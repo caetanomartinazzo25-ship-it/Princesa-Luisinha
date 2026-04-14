@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👑</title>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+  background: linear-gradient(#ffd6e7, #fff6fa);
+}
+
+/* fundo encantado */
+#bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at bottom, #ffe4ec, #fff6fa);
+}
+
+/* telinha inicial */
+#intro {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
+}
+
+#text {
+  font-size: 16px;
+  color: #d63384;
+  max-width: 90%;
+  line-height: 1.5;
+}
+
+#startBtn {
+  margin-top: 30px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 20px;
+  background: #ff66a3;
+  color: white;
+  font-size: 16px;
+}
+
+/* jogo */
+#game {
+  display: none;
+}
+
+#princess {
+  position: absolute;
+  width: 110px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 20px;
+}
+
+#hud {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  color: #ff4d88;
+}
+
+.monster {
+  position: absolute;
+  font-size: 30px;
+}
+
+#msg {
+  position: absolute;
+  width: 100%;
+  top: 40%;
+  text-align: center;
+  font-size: 22px;
+  color: #ff4d88;
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="bg"></div>
+
+<!-- música -->
+<iframe width="0" height="0"
+src="https://www.youtube.com/embed/q4k7_toGn_g?autoplay=1&loop=1&playlist=q4k7_toGn_g"
+frameborder="0" allow="autoplay"></iframe>
+
+<!-- INTRO -->
+<div id="intro">
+  <div id="text"></div>
+  <button id="startBtn" style="display:none;">Começar 👑</button>
+</div>
+
+<!-- JOGO -->
+<div id="game">
+  <img id="princess" src="princesa.png">
+  <div id="hud">❤️ 3 | 💖 0</div>
+  <div id="msg"></div>
+</div>
+
+<script>
+const historia = "Há muito tempo atrás, em um castelo encantado, havia uma linda princesinha pardinha chamada Luísa... Ela era doce, curiosa e tinha um brilho único no olhar ✨ Porém, em uma de suas aventuras, acabou abrindo um porão amaldiçoado... De lá saíram criaturas assustadoras 👾 Mas Luísa é forte... muito mais do que parece 👑 Será que você consegue proteger essa princesinha tão especial? 💖";
+
+let i = 0;
+
+function escrever() {
+  if (i < historia.length) {
+    document.getElementById("text").innerHTML += historia[i];
+    i++;
+    setTimeout(escrever, 30);
+  } else {
+    document.getElementById("startBtn").style.display = "block";
+  }
+}
+
+escrever();
+
+document.getElementById("startBtn").onclick = () => {
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("game").style.display = "block";
+  startGame();
+};
+
+let vidas = 3;
+let score = 0;
+let running = true;
+
+const princess = document.getElementById("princess");
+
+function spawnMonster() {
+  if (!running) return;
+
+  const el = document.createElement("div");
+  el.className = "monster";
+  el.innerText = ["👾","👻","😈"][Math.floor(Math.random()*3)];
+
+  let x = Math.random() * innerWidth;
+  let y = Math.random() * innerHeight;
+
+  el.style.left = x + "px";
+  el.style.top = y + "px";
+
+  document.body.appendChild(el);
+
+  const rect = princess.getBoundingClientRect();
+  let px = rect.left + rect.width/2;
+  let py = rect.top + rect.height/2;
+
+  let dx = (px - x) / 100;
+  let dy = (py - y) / 100;
+
+  function move() {
+    if (!running) return;
+
+    x += dx;
+    y += dy;
+
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+
+    if (Math.abs(x - px) < 40 && Math.abs(y - py) < 40) {
+      el.remove();
+      vidas--;
+      update();
+      if (vidas <= 0) gameOver();
+      return;
+    }
+
+    requestAnimationFrame(move);
+  }
+
+  move();
+
+  el.addEventListener("touchstart", () => {
+    score++;
+    update();
+    el.remove();
+  });
+
+  el.addEventListener("click", () => {
+    score++;
+    update();
+    el.remove();
+  });
+}
+
+function update() {
+  document.getElementById("hud").innerText =
+    "❤️ " + vidas + " | 💖 " + score;
+}
+
+function startGame() {
+  function loop() {
+    if (!running) return;
+    spawnMonster();
+    setTimeout(loop, 900);
+  }
+  loop();
+}
+
+function gameOver() {
+  running = false;
+
+  const msg = document.getElementById("msg");
+  msg.style.display = "block";
+
+  if (score >= 15) {
+    msg.innerHTML = "<br>você protegeu ela 👑<br><br>Luísa 💖";
+  } else {
+    msg.innerHTML = "tenta proteger ela melhor...";
+  }
+}
+</script>
+
+</body>
+</html>
